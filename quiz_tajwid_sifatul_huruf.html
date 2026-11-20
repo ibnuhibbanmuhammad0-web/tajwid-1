@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Tajwid & Sifatul Huruf</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Amiri (Arab) & Plus Jakarta Sans (Latin) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Victory Screen -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --emerald-850: #064e3b;
+            --emerald-900: #022c22;
+            --emerald-950: #011c16;
+            --gold-300: #fde047;
+            --gold-400: #facc15;
+            --gold-500: #eab308;
+            --gold-600: #ca8a04;
+            --gold-700: #a16207;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #064e3b, #022c22, #011c16);
+            min-height: 100vh;
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-arabic {
+            font-family: 'Amiri', serif;
+        }
+
+        /* Color Utility Classes */
+        .bg-emerald-850 { background-color: var(--emerald-850); }
+        .bg-emerald-900 { background-color: var(--emerald-900); }
+        .bg-emerald-950 { background-color: var(--emerald-950); }
+        .text-gold-300 { color: var(--gold-300); }
+        .text-gold-400 { color: var(--gold-400); }
+        .text-gold-500 { color: var(--gold-500); }
+        .text-emerald-950 { color: var(--emerald-950); }
+        .border-gold-300 { border-color: var(--gold-300); }
+        .border-gold-400 { border-color: var(--gold-400); }
+        .border-gold-500 { border-color: var(--gold-500); }
+
+        .from-gold-400 { --tw-gradient-from: #facc15 var(--tw-gradient-from-position); }
+        .to-gold-600 { --tw-gradient-to: #ca8a04 var(--tw-gradient-to-position); }
+        .from-gold-500 { --tw-gradient-from: #eab308 var(--tw-gradient-from-position); }
+        .to-gold-500 { --tw-gradient-to: #eab308 var(--tw-gradient-to-position); }
+        .to-gold-300 { --tw-gradient-to: #fde047 var(--tw-gradient-to-position); }
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(15, 34, 28, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-border-glow {
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.25);
+        }
+
+        /* Pulse animation for active elements */
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .pulse-subtle {
+            animation: subtlePulse 3s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(2, 44, 34, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ca8a04;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen antialiased p-4 sm:p-6 md:p-8">
+
+    <!-- Header Navigation -->
+    <header class="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-emerald-800/50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg text-emerald-950 text-xl font-bold">
+                <i class="fa-solid fa-book-quran"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight gold-gradient-text">Tajwid Master</h1>
+                <p class="text-xs text-emerald-300/80">Game Edukasi & Quiz Sifatul Huruf</p>
+            </div>
+        </div>
+
+        <div id="quiz-badge" class="hidden sm:flex items-center space-x-2 bg-emerald-900/80 border border-gold-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-gold-300">
+            <i class="fa-solid fa-star text-gold-400"></i>
+            <span>Level: Pembelajar Tajwid</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-3xl w-full mx-auto my-auto py-6">
+
+        <!-- 1. START SCREEN -->
+        <div id="start-screen" class="glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden transition-all duration-500">
+            <!-- Decorative Islamic Pattern Overlay -->
+            <div class="absolute -right-16 -top-16 opacity-10 text-gold-400 text-9xl pointer-events-none">
+                <i class="fa-solid fa-star-and-crescent"></i>
+            </div>
+
+            <div class="w-20 h-20 bg-emerald-900/80 border-2 border-gold-400/40 rounded-full flex items-center justify-center mx-auto mb-6 text-gold-400 text-3xl shadow-xl pulse-subtle">
+                <i class="fa-solid fa-kaaba"></i>
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl font-extrabold mb-3 leading-tight">
+                Uji Pemahaman <span class="gold-gradient-text">Ilmu Tajwid & Sifatul Huruf</span>
+            </h2>
+            <p class="text-emerald-200/90 text-sm sm:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+                Asah keterampilan tajwid Anda melalui pertanyaan interaktif seputar Makhraj, Sifat Lazimah, Sifat 'Aridliyyah, dan penerapan hukum bacaannya.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left max-w-xl mx-auto">
+                <div class="bg-emerald-950/60 p-4 rounded-2xl border border-emerald-800/40 flex items-center space-x-3">
+                    <i class="fa-solid fa-list-check text-gold-400 text-xl"></i>
+                    <div>
+                        <div class="text-xs text-emerald-400">Jumlah Soal</div>
+                        <div class="font-bold text-sm">8 Pertanyaan</div>
+                    </div>
+                </div>
+                <div class="bg-emerald-950/60 p-4 rounded-2xl border border-emerald-800/40 flex items-center space-x-3">
+                    <i class="fa-solid fa-clock text-gold-400 text-xl"></i>
+                    <div>
+                        <div class="text-xs text-emerald-400">Waktu Soal</div>
+                        <div class="font-bold text-sm">Tanpa Batas</div>
+                    </div>
+                </div>
+                <div class="bg-emerald-950/60 p-4 rounded-2xl border border-emerald-800/40 flex items-center space-x-3">
+                    <i class="fa-solid fa-lightbulb text-gold-400 text-xl"></i>
+                    <div>
+                        <div class="text-xs text-emerald-400">Fitur</div>
+                        <div class="font-bold text-sm">Penjelasan Ilmiah</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-emerald-950 font-extrabold rounded-2xl shadow-lg hover:shadow-gold-500/20 transform hover:-translate-y-0.5 transition duration-200 cursor-pointer flex items-center justify-center space-x-3 mx-auto text-lg">
+                <span>Mulai Kuis Sekarang</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- 2. QUIZ SCREEN -->
+        <div id="quiz-screen" class="hidden glass-card rounded-3xl p-6 sm:p-8 transition-all duration-300">
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-count" class="text-xs font-bold text-gold-400 tracking-wider uppercase">Soal 1 dari 8</span>
+                    <span id="score-live" class="text-xs font-semibold bg-emerald-900/90 border border-emerald-700/50 px-3 py-1 rounded-full text-emerald-200">Skor: 0</span>
+                </div>
+                <div class="w-full h-2.5 bg-emerald-950 rounded-full overflow-hidden p-0.5 border border-emerald-800/40">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-gold-500 to-gold-300 rounded-full transition-all duration-300" style="width: 12.5%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="mb-6">
+                <h3 id="question-text" class="text-lg sm:text-xl font-bold text-slate-100 leading-relaxed mb-3">
+                    <!-- Question text injected here -->
+                </h3>
+                <!-- Arabic text container (if available) -->
+                <div id="arabic-container" class="hidden my-4 p-4 bg-emerald-950/70 border border-gold-500/20 rounded-2xl text-center">
+                    <span id="arabic-text" class="font-arabic text-3xl sm:text-4xl text-gold-300 leading-loose"></span>
+                </div>
+            </div>
+
+            <!-- Options Container -->
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Option buttons dynamically generated -->
+            </div>
+
+            <!-- Feedback & Explanation Box (hidden by default) -->
+            <div id="explanation-box" class="hidden p-4 sm:p-5 rounded-2xl mb-6 transition-all duration-300">
+                <div class="flex items-start space-x-3">
+                    <div id="feedback-icon" class="text-2xl mt-0.5"></div>
+                    <div>
+                        <h4 id="feedback-title" class="font-bold text-base mb-1"></h4>
+                        <p id="explanation-text" class="text-sm text-slate-200 leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex justify-end">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden px-8 py-3 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-emerald-950 font-bold rounded-xl shadow-md hover:shadow-gold-500/20 transition duration-200 flex items-center space-x-2 text-sm sm:text-base">
+                    <span id="next-btn-text">Lanjut Soal Berikutnya</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. RESULT SCREEN -->
+        <div id="result-screen" class="hidden glass-card rounded-3xl p-6 sm:p-10 text-center transition-all duration-500">
+            <div id="result-badge-icon" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-2xl border-4">
+                <!-- Icon injected -->
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold mb-1" id="result-title">Hasil Kuis Tajwid</h2>
+            <p id="result-subtitle" class="text-emerald-300 text-sm mb-6">Berikut ringkasan capaian Anda</p>
+
+            <!-- Big Score Circle -->
+            <div class="my-6 bg-emerald-950/80 border border-gold-500/30 rounded-3xl p-6 max-w-sm mx-auto shadow-inner">
+                <div class="text-xs text-gold-400 font-bold uppercase tracking-widest mb-1">Nilai Akhir Anda</div>
+                <div class="text-5xl sm:text-6xl font-black gold-gradient-text my-2" id="score-percentage">0%</div>
+                <div class="text-sm text-slate-300" id="score-fraction">0 dari 8 Soal Benar</div>
+            </div>
+
+            <!-- Breakdown Stats -->
+            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8">
+                <div class="bg-emerald-900/40 p-4 rounded-2xl border border-emerald-800/50">
+                    <div class="text-xs text-emerald-400 mb-1">Jawaban Benar</div>
+                    <div class="text-2xl font-bold text-emerald-400" id="correct-count">0</div>
+                </div>
+                <div class="bg-emerald-900/40 p-4 rounded-2xl border border-emerald-800/50">
+                    <div class="text-xs text-rose-400 mb-1">Jawaban Salah</div>
+                    <div class="text-2xl font-bold text-rose-400" id="wrong-count">0</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="restartQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-emerald-950 font-extrabold rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Coba Ulang Kuis</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl w-full mx-auto text-center pt-6 border-t border-emerald-800/40 text-xs text-emerald-400/70">
+        <p>© 2026 Edukasi Tajwid Interactive — Mempelajari Ilmu Tajwid dengan Mudah & Menyenangkan</p>
+    </footer>
+
+    <!-- Quiz Data & Application Logic -->
+    <script>
+        // Quiz Questions Data based on user request
+        const questionsData = [
+            {
+                id: 1,
+                question: "Apa pengertian dari Ilmu Tajwid?",
+                arabic: "",
+                options: [
+                    "Ilmu yang mempelajari cara membunyikan setiap huruf hijaiyah sesuai dengan tempatnya (makhraj) disertai sifat-sifatnya.",
+                    "Ilmu yang mempelajari tata bahasa dan susunan kalimat bahasa Arab.",
+                    "Ilmu yang mempelajari sejarah penulisan Al-Qur'an pada zaman Rasulullah.",
+                    "Ilmu yang mempelajari irama dan lagu bacaan ayat Al-Qur'an."
+                ],
+                correct: 0,
+                explanation: "<strong>Ilmu Tajwid</strong> secara istilah adalah ilmu yang mempelajari bagaimana cara membunyikan setiap huruf sesuai dengan makhrajnya (tempat keluarnya) disertai dengan sifat-sifatnya (baik asli maupun mendatang)."
+            },
+            {
+                id: 2,
+                question: "Apa yang dimaksud dengan Sifat 'Aridliyyah (Sifatun 'Aridhah / Ghairu Lazimah)?",
+                arabic: "",
+                options: [
+                    "Sifat yang selalu melekat pada huruf dan tidak pernah lepas dalam keadaan apapun.",
+                    "Sifat yang tidak selalu melekat (mendatang), hanya muncul karena kondisi atau sebab tertentu dalam bacaan.",
+                    "Sifat khusus yang hanya dimiliki oleh huruf-huruf qalqalah.",
+                    "Sifat huruf yang berkaitan dengan panjang pendeknya nafas qari."
+                ],
+                correct: 1,
+                explanation: "<strong>Sifat 'Aridliyyah (Ghairu Lazimah)</strong> adalah sifat-sifat yang baru mendatang/muncul pada huruf karena sebab tertentu (seperti Hukum Mad, Izhar, Ikhfa, Tafkhim/Tarqiq), dan dapat berpisah dari huruf tersebut jika sebabnya hilang."
+            },
+            {
+                id: 3,
+                question: "Pada contoh bacaan di bawah ini, hukum bacaannya termasuk contoh sifat...",
+                arabic: "وَاِلَيْهِ تُرجَعٌون",
+                options: [
+                    "Sifat 'Aridliyyah",
+                    "Sifat Dzatiyah (Lazimah)"
+                ],
+                correct: 0,
+                explanation: "Bacaan <strong>وَاِلَيْهِ تُرجَعٌون</strong> mengandung hukum <em>Mad 'Arid Lissukun</em> / <em>Tafkhim-Tarqiq</em>. Sifat ini terjadi karena kondisi sukun di akhir ayat (sebab tertentu), sehingga dikategorikan sebagai <strong>Sifat 'Aridliyyah</strong>."
+            },
+            {
+                id: 4,
+                question: "Pada contoh bacaan di bawah ini, memantulkan huruf (Qalqalah) termasuk contoh sifat...",
+                arabic: "قُلْ اَعُوذُ بِرَبِّ الْفَلَقِ",
+                options: [
+                    "Sifat 'Aridliyyah",
+                    "Sifat Dzatiyah (Lazimah)"
+                ],
+                correct: 1,
+                explanation: "Huruf Qaf (ق) pada <strong>الْفَلَقِ</strong> memiliki sifat asli Qalqalah (pantulan) yang melekat secara alami pada hakikat huruf tersebut. Karena itu dikategorikan sebagai <strong>Sifat Dzatiyah (Lazimah)</strong>."
+            },
+            {
+                id: 5,
+                question: "Di bawah ini, manakah yang termasuk Sifat Lazimah (Sifat Asli)?",
+                arabic: "",
+                options: [
+                    "Jahar (جَهْر)",
+                    "Ghunnah (غُنَّة)",
+                    "Tarqiq (تَرقِيق)",
+                    "Tafkhim (تَفْخِيم)"
+                ],
+                correct: 0,
+                explanation: "<strong>Jahar (جَهْر)</strong> adalah sifat asli (Lazimah/Dzatiyah) dari huruf hijaiyah yang berarti tertahannya napas saat membunyikan huruf. Sedangkan Ghunnah, Tarqiq, dan Tafkhim merupakan Sifat 'Aridliyyah."
+            },
+            {
+                id: 6,
+                question: "Apa itu sifat Ghairu Lazimah?",
+                arabic: "",
+                options: [
+                    "Sifat-sifat pada huruf yang secara otomatis tidak selalu melekat (hanya muncul saat sebab/kondisi tertentu).",
+                    "Sifat-sifat utama yang pasti ada pada setiap huruf hijaiyah tanpa terkecuali.",
+                    "Sifat huruf yang bertolak belakang dengan makhraj huruf.",
+                    "Sifat yang menyebabkan huruf tidak bisa dibaca berurutan."
+                ],
+                correct: 0,
+                explanation: "<strong>Sifat Ghairu Lazimah</strong> (sama dengan Sifat 'Aridliyyah) adalah sifat-sifat yang tidak menetap secara permanen pada huruf, melainkan tergantung situasi hukum tajwid yang memengaruhinya."
+            },
+            {
+                id: 7,
+                question: "Di bawah ini manakah huruf yang mempunyai sifat Shafir (صَفِير)?",
+                arabic: "",
+                options: [
+                    "ص (Shad)",
+                    "ط (Tha)",
+                    "ظ (Zha)",
+                    "ع ('Ain)"
+                ],
+                correct: 0,
+                explanation: "Huruf yang memiliki sifat <strong>Shafir (صَفِير)</strong> (suara menyerupai siulan/desir burung) ada 3 huruf, yaitu: <strong>ص (Shad), ز (Zai), dan س (Sin)</strong>."
+            },
+            {
+                id: 8,
+                question: "Di bawah ini manakah sifatul huruf yang TIDAK memiliki lawan (Sifat Ghairu Mutadhaddah)?",
+                arabic: "",
+                options: [
+                    "Tafasshy (تَفَشِّي)",
+                    "Ismat (اِصْمَات)",
+                    "Shiddah (شِدَّة)",
+                    "Itbaq (اِطْبَاق)"
+                ],
+                correct: 0,
+                explanation: "<strong>Tafasshy (تَفَشِّي)</strong> adalah sifat tunggal (tidak punya lawan) yang dimiliki oleh huruf Syin (ش) yang berarti berhamburannya angin di dalam mulut. Sedangkan Ismat, Shiddah, dan Itbaq adalah sifat yang memiliki pasangan/lawan."
+            }
+        ];
+
+        // Game State Variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // Start Quiz
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+        }
+
+        // Load Question UI
+        function loadQuestion() {
+            answered = false;
+            const q = questionsData[currentQuestionIndex];
+
+            // Update Progress & Score
+            const totalQ = questionsData.length;
+            document.getElementById('question-count').innerText = `Soal ${currentQuestionIndex + 1} dari ${totalQ}`;
+            document.getElementById('score-live').innerText = `Skor: ${score}`;
+            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / totalQ) * 100}%`;
+
+            // Question text
+            document.getElementById('question-text').innerHTML = `${currentQuestionIndex + 1}. ${q.question}`;
+
+            // Arabic text block
+            const arabicContainer = document.getElementById('arabic-container');
+            const arabicText = document.getElementById('arabic-text');
+            if (q.arabic) {
+                arabicText.innerText = q.arabic;
+                arabicContainer.classList.remove('hidden');
+            } else {
+                arabicContainer.classList.add('hidden');
+            }
+
+            // Hide Explanation & Next button
+            const expBox = document.getElementById('explanation-box');
+            expBox.classList.add('hidden');
+            expBox.className = "hidden p-4 sm:p-5 rounded-2xl mb-6 transition-all duration-300";
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Render Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-2xl bg-emerald-950/70 border border-emerald-800/60 hover:border-gold-400/60 hover:bg-emerald-900/50 transition duration-200 flex items-start space-x-3 group cursor-pointer`;
+                btn.onclick = () => selectOption(index);
+                btn.id = `opt-${index}`;
+
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg bg-emerald-900 border border-emerald-700/60 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-emerald-950 text-emerald-300 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 transition">
+                        ${optionLabels[index]}
+                    </span>
+                    <span class="text-sm sm:text-base font-medium text-slate-200 group-hover:text-white leading-relaxed">
+                        ${opt}
+                    </span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Option Selected Handler
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            answered = true;
+
+            const q = questionsData[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('score-live').innerText = `Skor: ${score}`;
+            }
+
+            // Highlight buttons
+            q.options.forEach((_, index) => {
+                const btn = document.getElementById(`opt-${index}`);
+                btn.disabled = true;
+                btn.classList.remove('hover:border-gold-400/60', 'hover:bg-emerald-900/50', 'cursor-pointer');
+
+                if (index === q.correct) {
+                    btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-800/80 border-2 border-emerald-400 flex items-start space-x-3 shadow-lg";
+                    btn.querySelector('span:first-child').className = "w-7 h-7 rounded-lg bg-emerald-400 text-emerald-950 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5";
+                    btn.querySelector('span:first-child').innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (index === selectedIndex && !isCorrect) {
+                    btn.className = "w-full text-left p-4 rounded-2xl bg-rose-950/80 border-2 border-rose-500 flex items-start space-x-3";
+                    btn.querySelector('span:first-child').className = "w-7 h-7 rounded-lg bg-rose-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5";
+                    btn.querySelector('span:first-child').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                } else {
+                    btn.classList.add('opacity-40');
+                }
+            });
+
+            // Show Explanation Box
+            const expBox = document.getElementById('explanation-box');
+            const expTitle = document.getElementById('feedback-title');
+            const expIcon = document.getElementById('feedback-icon');
+            const expText = document.getElementById('explanation-text');
+
+            expBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                expBox.classList.add('bg-emerald-900/80', 'border', 'border-emerald-500/40', 'text-emerald-100');
+                expIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+                expTitle.innerText = "Jawaban Tepat!";
+                expTitle.className = "font-bold text-base text-emerald-300 mb-1";
+            } else {
+                expBox.classList.add('bg-rose-950/80', 'border', 'border-rose-500/40', 'text-rose-100');
+                expIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+                expTitle.innerText = "Jawaban Kurang Tepat";
+                expTitle.className = "font-bold text-base text-rose-300 mb-1";
+            }
+
+            expText.innerHTML = q.explanation;
+
+            // Show Next Button
+            const nextBtn = document.getElementById('next-btn');
+            const nextBtnText = document.getElementById('next-btn-text');
+            nextBtn.classList.remove('hidden');
+
+            if (currentQuestionIndex === questionsData.length - 1) {
+                nextBtnText.innerText = "Lihat Hasil Akhir";
+            } else {
+                nextBtnText.innerText = "Lanjut Soal Berikutnya";
+            }
+        }
+
+        // Next Question or Finish
+        function nextQuestion() {
+            if (currentQuestionIndex < questionsData.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Show Final Result Screen
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const totalQ = questionsData.length;
+            const correctCount = score / 10;
+            const wrongCount = totalQ - correctCount;
+            const percentage = Math.round((correctCount / totalQ) * 100);
+
+            document.getElementById('score-percentage').innerText = `${percentage}%`;
+            document.getElementById('score-fraction').innerText = `${correctCount} dari ${totalQ} Soal Benar`;
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('wrong-count').innerText = wrongCount;
+
+            const badgeIcon = document.getElementById('result-badge-icon');
+            const title = document.getElementById('result-title');
+            const subtitle = document.getElementById('result-subtitle');
+
+            if (percentage >= 80) {
+                badgeIcon.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-2xl bg-gradient-to-br from-gold-400 to-gold-600 text-emerald-950 border-4 border-gold-300";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-crown"></i>';
+                title.innerText = "Mumtaz! Luar Biasa!";
+                subtitle.innerText = "Pemahaman Tajwid & Sifatul Huruf Anda sangat matang.";
+                
+                // Fire confetti on high score
+                try {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                } catch(e) {}
+
+            } else if (percentage >= 50) {
+                badgeIcon.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-2xl bg-emerald-800 text-gold-400 border-4 border-gold-500/50";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-star-half-stroke"></i>';
+                title.innerText = "Jayyid! Cukup Bagus!";
+                subtitle.innerText = "Pemahaman Anda sudah baik, tingkatkan lagi muraja'ah teori tajwid.";
+            } else {
+                badgeIcon.className = "w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-2xl bg-emerald-950 text-slate-300 border-4 border-emerald-700";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-book-open"></i>';
+                title.innerText = "Semangat Belajar!";
+                subtitle.innerText = "Yuk pelajari kembali konsep Sifat Lazimah & 'Aridliyyah lalu coba lagi!";
+            }
+        }
+
+        // Restart Quiz
+        function restartQuiz() {
+            document.getElementById('result-screen').classList.add('hidden');
+            startQuiz();
+        }
+    </script>
+</body>
+</html>
